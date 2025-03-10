@@ -66,11 +66,11 @@ async def on_ready():
     print("Slash commands should be available in a few minutes.")
     
     # Set custom status
-    activity = discord.Activity(
-        type=discord.ActivityType.watching,
-        name="bkbot but extra"
-    )
     try:
+        activity = discord.Activity(
+            type=discord.ActivityType.custom,
+            state="bkbot but extra"  # Using state instead of name for custom status
+        )
         await bot.change_presence(status=discord.Status.online, activity=activity)
         print("Status updated successfully")
     except Exception as e:
