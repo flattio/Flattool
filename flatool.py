@@ -64,7 +64,7 @@ async def on_ready():
     print(f"Logged in as {bot.user}!")
     print(f"Guild ID: {GUILD_ID}")
     print("Slash commands should be available in a few minutes.")
-    await bot.change_presence(activity=discord.Game(name="BKBot but extra"))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.custom, name="bkbot but extra"))
 
 # Run the bot
 bot.run(TOKEN)
