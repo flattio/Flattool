@@ -14,6 +14,8 @@ ALLOWED_ROLE_IDS = [1121590212011773962, 1091441098330746919]
 # Initialize the bot
 intents = discord.Intents.default()
 intents.message_content = True
+intents.guilds = True
+intents.guild_messages = True
 bot = commands.Bot(command_prefix="bke!", intents=intents)
 
 # Slash Commands
@@ -38,6 +40,10 @@ async def say(interaction: discord.Interaction, channel: discord.TextChannel, me
         await interaction.response.send_message("Message sent!", ephemeral=True)
     else:
         await interaction.response.send_message("You do not have permission to use this command.", ephemeral=True)
+
+@bot.command()
+async def hello(ctx):
+    await ctx.send('Hello! This is a prefix command.')
 
 @bot.event
 async def on_ready():
