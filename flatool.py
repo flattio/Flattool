@@ -67,11 +67,7 @@ async def on_ready():
     
     # Set custom status
     try:
-        activity = discord.Activity(
-            type=discord.ActivityType.custom,
-            state="bkbot but extra"  # Using state instead of name for custom status
-        )
-        await bot.change_presence(status=discord.Status.online, activity=activity)
+        await bot.change_presence(activity=discord.Game(name="bkbot but extra"))
         print("Status updated successfully")
     except Exception as e:
         print(f"Failed to update status: {e}")
