@@ -1,0 +1,32 @@
+# Ignore .env file to keep sensitive data safe
+.env
+
+# Ignore node_modules (for potential mixed projects with Node.js)
+node_modules/
+
+# Ignore logs
+*.log
+logs/
+npm-debug.log*
+
+# Ignore cache and temp files
+.DS_Store
+*.swp
+
+# Ignore Python bytecode files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore virtual environment directories
+venv/
+env/
+ENV/
+env.bak/
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+
+# Ignore Jupyter notebook checkpoints
+.ipynb_checkpoints/
