@@ -55,23 +55,21 @@ async def say(ctx, channel: discord.TextChannel, *, message: str):
     else:
         await ctx.send("You do not have permission to use this command.")
 
-@bot.command()
-async def hello(ctx):
-    await ctx.send('Hello! This is a prefix command.')
-
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}!")
     print(f"Guild ID: {GUILD_ID}")
     print("Slash commands should be available in a few minutes.")
     
-    # Set custom status
+    # Set custom status with no "Playing" label
     try:
-        await bot.change_presence(activity=discord.Game(name="bkbot but extra"))
+        activity = discord.Activity(
+            type=discord.ActivityType.custom,  # Custom activity type (no label like 'Playing')
+            name="bkbot but extra"  # Your custom status text
+        )
+        await bot.change_presence(status=discord.Status.online, activity=activity)
         print("Status updated successfully")
     except Exception as e:
         print(f"Failed to update status: {e}")
 
-# Run the bot
-bot.run(TOKEN)
 
