@@ -68,5 +68,5 @@ async def on_ready():
     await bot.change_presence(activity=activity)    await bot.change_presence(activity=activity)
 
 # Run the bot
-bot.run(TOKEN)bot.run(TOKEN)
+bot.run(TOKEN)
 
