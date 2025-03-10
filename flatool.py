@@ -64,8 +64,17 @@ async def on_ready():
     print(f"Logged in as {bot.user}!")
     print(f"Guild ID: {GUILD_ID}")
     print("Slash commands should be available in a few minutes.")
-    activity = discord.Activity(type=discord.ActivityType.custom, name="bkbot but extra")
-    await bot.change_presence(activity=activity)
+    
+    # Set custom status
+    activity = discord.Activity(
+        type=discord.ActivityType.watching,
+        name="bkbot but extra"
+    )
+    try:
+        await bot.change_presence(status=discord.Status.online, activity=activity)
+        print("Status updated successfully")
+    except Exception as e:
+        print(f"Failed to update status: {e}")
 
 # Run the bot
 bot.run(TOKEN)
