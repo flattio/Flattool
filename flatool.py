@@ -65,10 +65,10 @@ async def on_ready():
     print(f"Guild ID: {GUILD_ID}")
     print("Slash commands should be available in a few minutes.")
     
-    # Set custom status using Game object
+    # Set custom status (translated from JS version)
     try:
-        game = discord.Game("bkbot but extra")
-        await bot.change_presence(status=discord.Status.online, activity=game)
+        activity = discord.Activity(type=4, name="BKBot but extra")  # Type 4 is "Custom Status"
+        await bot.change_presence(status=discord.Status.online, activity=activity)
         print("Status updated successfully")
     except Exception as e:
         print(f"Failed to update status: {e}")
