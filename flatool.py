@@ -41,6 +41,20 @@ async def say(interaction: discord.Interaction, channel: discord.TextChannel, me
     else:
         await interaction.response.send_message("You do not have permission to use this command.", ephemeral=True)
 
+# Add these prefix commands below the existing slash commands
+@bot.command()
+async def ping(ctx):
+    ping = round(bot.latency * 1000)
+    await ctx.send(f"Pong! Latency is {ping}ms.")
+
+@bot.command()
+async def say(ctx, channel: discord.TextChannel, *, message: str):
+    if any(role.id in ALLOWED_ROLE_IDS for role in ctx.author.roles):
+        await channel.send(message)
+        await ctx.send("Message sent!")
+    else:
+        await ctx.send("You do not have permission to use this command.")
+
 @bot.command()
 async def hello(ctx):
     await ctx.send('Hello! This is a prefix command.')
