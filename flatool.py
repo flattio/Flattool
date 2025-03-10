@@ -64,8 +64,8 @@ async def on_ready():
     print(f"Logged in as {bot.user}!")
     print(f"Guild ID: {GUILD_ID}")
     print("Slash commands should be available in a few minutes.")
-    activity = discord.CustomActivity(name="bkbot but extra")
-    await bot.change_presence(activity=activity)    await bot.change_presence(activity=activity)
+    activity = discord.Activity(type=discord.ActivityType.custom, name="bkbot but extra")
+    await bot.change_presence(activity=activity)
 
 # Run the bot
 bot.run(TOKEN)
