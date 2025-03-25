@@ -1,4 +1,4 @@
-![flatool logo](https://github.com/user-attachments/assets/369a60c5-05c5-4d3e-9dbb-bd1e91361a67)
+<img src="flatool-logo.png" alt="Alt Text" width="300">
 # Flatool (apcgptb)
 A python-coded general-purpose tool bot.
 
