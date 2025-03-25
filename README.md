@@ -1,6 +1,6 @@
 <img src="flatool-logo.png" alt="Alt Text" width="300">
 
-# Flatool (apcgptb)
+# Flatool
 A python-coded general-purpose tool bot.
 
 ## 🚀 Roadmap for v1.0.0
