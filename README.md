@@ -1,3 +1,4 @@
+![flatool logo](https://github.com/user-attachments/assets/369a60c5-05c5-4d3e-9dbb-bd1e91361a67)
 # Flatool (apcgptb)
 A python-coded general-purpose tool bot.
 
@@ -22,13 +23,16 @@ This roadmap outlines potential ideas and future improvements. Features listed h
   </details>  
 
 ### 📝 Plans / Ideas  
-- [ ] Having a bot people could use without self-hosting  
+- [x] Having a bot people could use without self-hosting  
 
   <details>
     <summary>Why?</summary>
     Not everyone is the best at doing things with Discord bots. Despite the purpose of just small tools, a central Discord bot could be nice.  
 
     Again, as the section says, this is just an idea.
+    
+    Update 3/25/25
+    I now have the ability to host the bot on a server that is reliable, i also have the bot made, its just not able to be used by the general public until version 1.0 has released. Hurray!
   </details>  
 
 - [ ] Having a dashboard one could hook up to their domain  
