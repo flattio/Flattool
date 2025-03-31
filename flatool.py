@@ -14,6 +14,8 @@ ALLOWED_ROLE_IDS = [1121590212011773962, 1091441098330746919]
 # Initialize the bot
 intents = discord.Intents.default()
 intents.message_content = True
+intents.guilds = True
+intents.guild_messages = True
 bot = commands.Bot(command_prefix="bke!", intents=intents)
 
 # Slash Commands
@@ -39,12 +41,38 @@ async def say(interaction: discord.Interaction, channel: discord.TextChannel, me
     else:
         await interaction.response.send_message("You do not have permission to use this command.", ephemeral=True)
 
+# Add these prefix commands below the existing slash commands
+@bot.command()
+async def ping(ctx):
+    ping = round(bot.latency * 1000)
+    await ctx.send(f"Pong! Latency is {ping}ms.")
+
+@bot.command()
+async def say(ctx, channel: discord.TextChannel, *, message: str):
+    if any(role.id in ALLOWED_ROLE_IDS for role in ctx.author.roles):
+        await channel.send(message)
+        await ctx.send("Message sent!")
+    else:
+        await ctx.send("You do not have permission to use this command.")
+
+@bot.command()
+async def hello(ctx):
+    await ctx.send('Hello! This is a prefix command.')
+
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}!")
     print(f"Guild ID: {GUILD_ID}")
     print("Slash commands should be available in a few minutes.")
-    await bot.change_presence(activity=discord.Game(name="BKBot but extra"))
+    
+    # Set custom status (translated from JS version)
+    try:
+        activity = discord.Activity(type=4, name="BKBot but extra")  # Type 4 is "Custom Status"
+        await bot.change_presence(status=discord.Status.online, activity=activity)
+        print("Status updated successfully")
+    except Exception as e:
+        print(f"Failed to update status: {e}")
 
 # Run the bot
 bot.run(TOKEN)
+
