@@ -16,7 +16,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
 intents.guild_messages = True
-bot = commands.Bot(command_prefix="bke!", intents=intents)
+bot = commands.Bot(command_prefix="f!", intents=intents)
 
 # Slash Commands
 async def setup_hook():
