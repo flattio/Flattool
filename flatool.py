@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
+import asyncio 
 
 # Load environment variables
 load_dotenv()
@@ -58,6 +59,23 @@ async def say(ctx, channel: discord.TextChannel, *, message: str):
 @bot.command()
 async def hello(ctx):
     await ctx.send('Hello! This is a prefix command.')
+
+@bot.command()
+async def setup(ctx):
+    if any(role.id in ALLOWED_ROLE_IDS for role in ctx.author.roles):
+        commands = [
+            "'remove 1094342226613641216",
+            "'remove 1220502078003085433",
+            "'remove 1091441098330746918",
+            "'remove 1186352947714609222",
+            "'add 1121590212011773962"
+        ]
+        
+        for command in commands:
+            await ctx.send(command)
+            await asyncio.sleep(1)  # Wait 1 second between messages
+    else:
+        await ctx.send("You do not have permission to use this command.")
 
 @bot.event
 async def on_ready():
