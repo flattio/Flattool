@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD_ID = int(os.getenv('GUILD_ID'))  # Convert to int
 ALLOWED_ROLE_IDS = [1121590212011773962, 1091441098330746919]
 
@@ -74,5 +73,5 @@ async def on_ready():
         print(f"Failed to update status: {e}")
 
 # Run the bot
-bot.run(TOKEN)
+bot.run(os.getenv(DISCORD_TOKEN))
 
