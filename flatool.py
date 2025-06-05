@@ -28,8 +28,10 @@ async def ping(ctx: discord.ApplicationContext):
 )
 async def say(
     ctx: discord.ApplicationContext,
-    channel: discord.Option(discord.TextChannel, "Channel to send the message to"),
-    message: discord.Option(str, "Message to send"),
+    channel: discord.Option(
+        discord.TextChannel, description="Channel to send the message to"
+    ),
+    message: discord.Option(str, description="Message to send"),
 ):
     # Check if the user has one of the allowed roles
     if any(role.id in ALLOWED_ROLE_IDS for role in ctx.author.roles):
