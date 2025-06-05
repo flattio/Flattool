@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.3 (2025-06-05)
+
+### Bug Fixes
+
+- Configure workflow Git user
+  ([`41bb5b2`](https://github.com/flattio/Flattool/commit/41bb5b299c8bd23195a71dd3f0fbffb6fdd6ca78))
+
+
 ## v1.0.2 (2025-06-05)
 
 ### Bug Fixes
