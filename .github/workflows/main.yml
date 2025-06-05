@@ -32,11 +32,11 @@ jobs:
           pip install . 
           
       - name: Install Semantic Release
-        run: pip install "python-semantic-release>=9.0.0" # Ensure you have it installed
+        run: pip install python-semantic-release # Ensure you have it installed
 
       - name: Run Semantic Release
         id: semantic
-        uses: python-semantic-release/python-semantic-release@latest
+        uses: python-semantic-release/python-semantic-release@v10.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
