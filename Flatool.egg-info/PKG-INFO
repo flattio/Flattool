@@ -1,0 +1,99 @@
+Metadata-Version: 2.4
+Name: Flatool
+Version: 0.1.0
+Summary: General purpose Discord tool bot.
+License: MIT
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: aiohappyeyeballs==2.6.1
+Requires-Dist: aiohttp==3.12.6
+Requires-Dist: aiosignal==1.3.2
+Requires-Dist: argcomplete==3.6.2
+Requires-Dist: attrs==25.3.0
+Requires-Dist: audioop-lts==0.2.1
+Requires-Dist: build==1.2.2.post1
+Requires-Dist: cffi==1.17.1
+Requires-Dist: charset-normalizer==3.4.2
+Requires-Dist: click==8.2.1
+Requires-Dist: colorama==0.4.6
+Requires-Dist: commitizen==4.8.2
+Requires-Dist: decli==0.6.3
+Requires-Dist: frozenlist==1.6.0
+Requires-Dist: idna==3.10
+Requires-Dist: Jinja2==3.1.6
+Requires-Dist: MarkupSafe==3.0.2
+Requires-Dist: multidict==6.4.4
+Requires-Dist: packaging==25.0
+Requires-Dist: pip-tools==7.4.1
+Requires-Dist: prompt_toolkit==3.0.51
+Requires-Dist: propcache==0.3.1
+Requires-Dist: py-cord==2.6.1
+Requires-Dist: pycparser==2.22
+Requires-Dist: PyNaCl==1.5.0
+Requires-Dist: pyproject_hooks==1.2.0
+Requires-Dist: python-dotenv==1.1.0
+Requires-Dist: PyYAML==6.0.2
+Requires-Dist: questionary==2.1.0
+Requires-Dist: setuptools==80.9.0
+Requires-Dist: termcolor==2.5.0
+Requires-Dist: tomlkit==0.13.2
+Requires-Dist: wcwidth==0.2.13
+Requires-Dist: wheel==0.45.1
+Requires-Dist: yarl==1.20.0
+
+<img src="flatool-logo.png" alt="Alt Text" width="300">
+
+# Flattool
+A python-coded general-purpose tool bot.
+
+## 🚀 Roadmap for v1.0.0
+
+This roadmap outlines potential ideas and future improvements. Features listed here are not guaranteed and may change over time.  
+
+### ✅ Completed  
+- [x] Initial bot setup  
+- [x] /say and /ping commands  
+
+### 🔄 In Progress  
+- [ ] Auto/manual reacting based on outside bot message  
+
+  <details>
+    <summary>What would this do?</summary>
+    This would be for replying to bots like Appy or any other bot. It would add reactions based on what a bot says (customizable trigger words) or manually with a command.  
+
+    The reactions would be also customizable, this would be useful for having mini "old school polls" on bot messages.  
+
+    Use cases would likely be varied but for one of the aforementioned Appy, which is a mod application bot, it would allow you to auto-start polls on applications, which Appy doesn't do by default.
+  </details>  
+
+### 📝 Plans / Ideas  
+- [x] Having a bot people could use without self-hosting  
+
+  <details>
+    <summary>Why?</summary>
+    Not everyone is the best at doing things with Discord bots. Despite the purpose of just small tools, a central Discord bot could be nice.  
+
+    Again, as the section says, this is just an idea.
+    
+    Update 3/25/25
+    I now have the ability to host the bot on a server that is reliable, i also have the bot made, its just not able to be used by the general public until version 1.0 has released. Hurray!
+  </details>  
+
+- [ ] Having a dashboard one could hook up to their domain  
+
+  <details>
+    <summary>What would this do?</summary>
+    This would just be for easier setup of permissions.  
+
+    If I end up making a central bot, then I will make a public access one, but for self-hosting, I would like to somehow have an injectable dashboard for someone's domain.  
+
+    I don't know exactly what I'm talking about, but you get the gist.  
+
+    Some other cool ideas for this: If this does happen, I would like to have some type of terminal in the dash that lets you send bot commands that will affect things in the server.  
+
+    This would be like your "console." Any actions done in said console would have a logging area in the dash and in the server.
+  </details>  
+
+- [ ] Basic moderation/Case logging  
+
+_Features and priorities may shift based on feedback and needs._  
