@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.2 (2025-06-05)
+
+### Bug Fixes
+
+- Configure pyproject.toml for semantic release
+  ([`bbcca3e`](https://github.com/flattio/Flattool/commit/bbcca3ef2c59b9966e83fa92670f0c1c9d0bb1d6))
+
+
 ## v1.0.1 (2025-06-05)
 
 ### Bug Fixes
