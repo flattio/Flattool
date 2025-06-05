@@ -52,3 +52,6 @@ dependencies = [
 name = "cz_conventional_commits"
 version = "0.1.1"
 tag_format = "v$version"
+
+[tool.semantic_release]
+branch = "main"
