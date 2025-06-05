@@ -31,6 +31,14 @@ jobs:
           pip install setuptools wheel
           pip install python-semantic-release
 
+      - name: Configure Git User
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # This makes sure the GITHUB_TOKEN is used for subsequent git operations
+          # This is critical for pushing tags/commits back to the repo
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          
       - name: Run Semantic Release
         id: semantic
         uses: python-semantic-release/python-semantic-release@v10.0.2
