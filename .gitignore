@@ -30,3 +30,6 @@ env.bak/
 
 # Ignore Jupyter notebook checkpoints
 .ipynb_checkpoints/
+
+# database
+data/
