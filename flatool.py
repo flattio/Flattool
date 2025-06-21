@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 from discord import SlashCommandGroup
 from dotenv import load_dotenv
+import database as db
 
 # Configure logging
 logging.basicConfig(
@@ -14,6 +15,7 @@ logger = logging.getLogger("flatool")
 # project modules
 
 load_dotenv()
+db.init()
 
 DEBUG_GUILDS = [
     int(os.getenv("DEBUG_GUILDS", 0))

@@ -1,23 +1,8 @@
 import discord
 from discord.commands import SlashCommandGroup, Option
 from discord.ext import commands, tasks
-import logging  # Import the logging library
-
-# Set up basic logging configuration
-# This will output logs to the console. For production, you might want to log to a file.
-# logging.basicConfig(
-#     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-# )
-
-# You might want to store these in a database or a persistent file for a production bot
-# so that the bot remembers the embed's location across restarts.
-# For this example, they will be in-memory and reset if the bot restarts.
-CONFIG = {
-    "role_embed_channel_id": None,
-    "role_embed_message_id": None,
-    "roles_to_track": [],  # Example: [123456789012345678, 234567890123456789] (Role IDs)
-    "embed_title": "Role Member Tracker",  # New: Default title for the embed
-}
+import logging
+import database as db
 
 
 class RoleTracker(commands.Cog):
@@ -28,50 +13,47 @@ class RoleTracker(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        # Initialize a logger specifically for this cog
         self.logger = logging.getLogger(__name__)
         self.logger.info("Initializing RoleTracker cog.")
-        # This will hold the actual discord.Message object of the embed we are tracking
         self.role_embed_message = None
+        # Load config from database
+        self.config = db.load_config()
 
-    # Slash command group for role tracking commands
     role_tracker_commands = SlashCommandGroup(
         "role_tracker", "Commands related to tracking roles and members."
     )
 
     @commands.Cog.listener()
     async def on_ready(self):
-        """
-        Event listener that runs when the bot is fully ready.
-        It starts the role embed update task.
-        """
         self.logger.info(f"Logged in as {self.bot.user} (ID: {self.bot.user.id})")
         self.logger.info("Starting role embed update task...")
-        self.update_role_embed.start()  # Start the background task
+        self.update_role_embed.start()
 
-        # Attempt to retrieve the message if IDs are known from a previous session (if persistent storage was used)
-        if CONFIG["role_embed_channel_id"] and CONFIG["role_embed_message_id"]:
+        if (
+            self.config["role_embed_channel_id"]
+            and self.config["role_embed_message_id"]
+        ):
             try:
-                channel = self.bot.get_channel(CONFIG["role_embed_channel_id"])
+                channel = self.bot.get_channel(self.config["role_embed_channel_id"])
                 if channel:
                     self.role_embed_message = await channel.fetch_message(
-                        CONFIG["role_embed_message_id"]
+                        self.config["role_embed_message_id"]
                     )
                     self.logger.info(
                         f"Successfully loaded existing role embed message in channel: {channel.name}"
                     )
                 else:
                     self.logger.warning(
-                        f"Could not find channel with ID {CONFIG['role_embed_channel_id']}"
+                        f"Could not find channel with ID {self.config['role_embed_channel_id']}"
                     )
             except discord.NotFound:
                 self.logger.warning(
-                    f"Existing role embed message with ID {CONFIG['role_embed_message_id']} not found."
+                    f"Existing role embed message with ID {self.config['role_embed_message_id']} not found."
                 )
                 self.role_embed_message = None
             except discord.Forbidden:
                 self.logger.error(
-                    f"Bot does not have permissions to access channel or message for ID {CONFIG['role_embed_channel_id']}."
+                    f"Bot does not have permissions to access channel or message for ID {self.config['role_embed_channel_id']}."
                 )
                 self.role_embed_message = None
             except Exception as e:
@@ -81,34 +63,24 @@ class RoleTracker(commands.Cog):
                 self.role_embed_message = None
 
     def build_role_embed(self, guild: discord.Guild) -> discord.Embed:
-        """
-        Constructs the Discord embed showing roles and their members.
-        This function dynamically generates the content based on current guild data.
-        Members with multiple tracked roles will only appear under their highest role.
-        """
         embed = discord.Embed(
-            title=CONFIG["embed_title"],  # Use the title from CONFIG
-            description="This embed lists members currently assigned to specific roles. "
-            "Members holding multiple tracked roles are listed under their highest role.",
-            color=discord.Color.blue(),
+            title=self.config["embed_title"],
+            color=discord.Color.from_rgb(255, 255, 255),
         )
         embed.set_footer(
             text=f"Last updated: {discord.utils.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}"
         )
 
-        # Determine the set of roles we care about
-        # If roles_to_track is empty, we consider all roles with members as "tracked"
-        if not CONFIG["roles_to_track"]:
+        if not self.config["roles_to_track"]:
             trackable_roles = {role.id: role for role in guild.roles if role.members}
             embed.description += "\n\n**Note:** No specific roles are configured for tracking. Displaying all roles with members."
         else:
             trackable_roles = {}
-            for role_id in CONFIG["roles_to_track"]:
+            for role_id in self.config["roles_to_track"]:
                 role = guild.get_role(role_id)
                 if role:
                     trackable_roles[role.id] = role
                 else:
-                    # Only add field if a specific tracked role is not found
                     embed.add_field(
                         name=f"Role Not Found (ID: {role_id})",
                         value="This role could not be found.",
@@ -123,40 +95,28 @@ class RoleTracker(commands.Cog):
             )
             return embed
 
-        # Dictionary to store members grouped by their highest role
         members_by_highest_role = {role_id: [] for role_id in trackable_roles}
 
-        # Iterate through all members in the guild
         for member in guild.members:
-            # Find all roles the member has that are in our trackable_roles set
             member_trackable_roles = [
                 role for role in member.roles if role.id in trackable_roles
             ]
-
             if member_trackable_roles:
-                # Sort these roles by position (highest position first)
                 member_trackable_roles.sort(key=lambda r: r.position, reverse=True)
                 highest_role = member_trackable_roles[0]
-                # Changed from member.display_name to member.mention
                 members_by_highest_role[highest_role.id].append(member.mention)
 
-        # Now, build the embed fields based on our grouped members
-        # Sort roles by position for consistent display
         sorted_roles = sorted(
             trackable_roles.values(), key=lambda r: r.position, reverse=True
         )
 
         for role in sorted_roles:
             members = members_by_highest_role.get(role.id, [])
-            # Sort members alphabetically for consistent display (by their mention string)
             members.sort()
-
             if members:
                 member_list = "\n".join(members)
-                # Ensure field value does not exceed Discord's 1024 character limit
-                # Mentions are shorter than display names, but still good to check
-                if len(member_list) > 1000:  # Approximate check before truncation
-                    member_list = member_list[:997] + "..."  # Truncate and add ellipsis
+                if len(member_list) > 1000:
+                    member_list = member_list[:997] + "..."
                 embed.add_field(
                     name=f"{role.name} ({len(members)} members)",
                     value=member_list,
@@ -173,9 +133,7 @@ class RoleTracker(commands.Cog):
     @role_tracker_commands.command(
         name="set_embed", description="Set up or move the role member tracking embed."
     )
-    @commands.has_permissions(
-        manage_roles=True
-    )  # Require manage_roles permission to use this command
+    @commands.has_permissions(manage_roles=True)
     async def set_role_embed(
         self,
         ctx: discord.ApplicationContext,
@@ -185,13 +143,7 @@ class RoleTracker(commands.Cog):
             required=True,
         ),
     ):
-        """
-        Sets up the initial role tracking embed in the specified channel.
-        If an embed already exists, it will be updated and moved to the new channel.
-        """
-        await ctx.defer(ephemeral=True)  # Acknowledge the command immediately
-
-        # Get the guild from the context
+        await ctx.defer(ephemeral=True)
         guild = ctx.guild
         if not guild:
             await ctx.followup.send(
@@ -201,11 +153,9 @@ class RoleTracker(commands.Cog):
             return
 
         try:
-            # Build the initial embed
             initial_embed = self.build_role_embed(guild)
 
             if self.role_embed_message:
-                # If an existing message is being tracked, delete it from its old location
                 try:
                     await self.role_embed_message.delete()
                     self.logger.info(
@@ -219,15 +169,14 @@ class RoleTracker(commands.Cog):
                     self.logger.warning(
                         "No permissions to delete old role embed message."
                     )
-                self.role_embed_message = None  # Clear the reference
+                self.role_embed_message = None
 
-            # Send the new embed message to the specified channel
             new_message = await channel.send(embed=initial_embed)
             self.role_embed_message = new_message
 
-            # Store the channel and message IDs
-            CONFIG["role_embed_channel_id"] = channel.id
-            CONFIG["role_embed_message_id"] = new_message.id
+            self.config["role_embed_channel_id"] = channel.id
+            self.config["role_embed_message_id"] = new_message.id
+            db.save_config(self.config)
 
             await ctx.followup.send(
                 f"Role member tracking embed has been set up in {channel.mention}. "
@@ -247,9 +196,7 @@ class RoleTracker(commands.Cog):
                 f"Bot lacks permissions to send messages/embeds in channel {channel.name} (ID: {channel.id})."
             )
         except Exception as e:
-            self.logger.error(
-                f"Error setting up role embed: {e}", exc_info=True
-            )  # exc_info=True prints traceback
+            self.logger.error(f"Error setting up role embed: {e}", exc_info=True)
             await ctx.followup.send(
                 f"An error occurred while setting up the embed: {e}", ephemeral=True
             )
@@ -263,10 +210,10 @@ class RoleTracker(commands.Cog):
         ctx: discord.ApplicationContext,
         role: Option(discord.Role, "The role to add to the tracker.", required=True),
     ):
-        """Adds a role to the list of roles to be tracked."""
         await ctx.defer(ephemeral=True)
-        if role.id not in CONFIG["roles_to_track"]:
-            CONFIG["roles_to_track"].append(role.id)
+        if role.id not in self.config["roles_to_track"]:
+            self.config["roles_to_track"].append(role.id)
+            db.save_config(self.config)
             await ctx.followup.send(
                 f"Role `{role.name}` has been added to the tracker. The embed will update shortly.",
                 ephemeral=True,
@@ -274,7 +221,6 @@ class RoleTracker(commands.Cog):
             self.logger.info(
                 f"Added role {role.name} (ID: {role.id}) to tracking list."
             )
-            # Immediately update the embed after adding a role
             await self._update_embed_now(ctx.guild)
         else:
             await ctx.followup.send(
@@ -295,10 +241,10 @@ class RoleTracker(commands.Cog):
             discord.Role, "The role to remove from the tracker.", required=True
         ),
     ):
-        """Removes a role from the list of roles to be tracked."""
         await ctx.defer(ephemeral=True)
-        if role.id in CONFIG["roles_to_track"]:
-            CONFIG["roles_to_track"].remove(role.id)
+        if role.id in self.config["roles_to_track"]:
+            self.config["roles_to_track"].remove(role.id)
+            db.save_config(self.config)
             await ctx.followup.send(
                 f"Role `{role.name}` has been removed from the tracker. The embed will update shortly.",
                 ephemeral=True,
@@ -306,7 +252,6 @@ class RoleTracker(commands.Cog):
             self.logger.info(
                 f"Removed role {role.name} (ID: {role.id}) from tracking list."
             )
-            # Immediately update the embed after removing a role
             await self._update_embed_now(ctx.guild)
         else:
             await ctx.followup.send(
@@ -321,9 +266,8 @@ class RoleTracker(commands.Cog):
     )
     @commands.has_permissions(manage_roles=True)
     async def list_tracked_roles(self, ctx: discord.ApplicationContext):
-        """Lists all roles currently configured for tracking."""
         await ctx.defer(ephemeral=True)
-        if not CONFIG["roles_to_track"]:
+        if not self.config["roles_to_track"]:
             await ctx.followup.send(
                 "No specific roles are currently being tracked. The embed will show all roles with members.",
                 ephemeral=True,
@@ -332,7 +276,7 @@ class RoleTracker(commands.Cog):
             return
 
         tracked_role_names = []
-        for role_id in CONFIG["roles_to_track"]:
+        for role_id in self.config["roles_to_track"]:
             role = ctx.guild.get_role(role_id)
             if role:
                 tracked_role_names.append(role.name)
@@ -358,15 +302,10 @@ class RoleTracker(commands.Cog):
         ctx: discord.ApplicationContext,
         new_title: Option(str, "The new title for the role embed.", required=True),
     ):
-        """
-        Changes the title of the role member tracking embed.
-        """
         await ctx.defer(ephemeral=True)
-        CONFIG["embed_title"] = new_title  # Update the title in CONFIG
-        await self._update_embed_now(
-            ctx.guild
-        )  # Trigger an immediate update to reflect the change
-
+        self.config["embed_title"] = new_title
+        db.save_config(self.config)
+        await self._update_embed_now(ctx.guild)
         await ctx.followup.send(
             f"The title of the role member embed has been changed to: `{new_title}`. "
             "The embed should update shortly.",
@@ -380,7 +319,6 @@ class RoleTracker(commands.Cog):
     )
     @commands.has_permissions(manage_roles=True)
     async def update_embed_manual(self, ctx: discord.ApplicationContext):
-        """Manually triggers an update of the role member embed."""
         await ctx.defer(ephemeral=True)
         await self._update_embed_now(ctx.guild)
         self.logger.info(
@@ -391,7 +329,6 @@ class RoleTracker(commands.Cog):
         )
 
     async def _update_embed_now(self, guild: discord.Guild):
-        """Helper to force an embed update immediately."""
         if not self.role_embed_message:
             self.logger.warning("No role embed message found to update.")
             return
@@ -407,8 +344,9 @@ class RoleTracker(commands.Cog):
                 "Role embed message not found during manual update. Resetting reference."
             )
             self.role_embed_message = None
-            CONFIG["role_embed_channel_id"] = None
-            CONFIG["role_embed_message_id"] = None
+            self.config["role_embed_channel_id"] = None
+            self.config["role_embed_message_id"] = None
+            db.save_config(self.config)
         except discord.Forbidden:
             self.logger.error(
                 "No permissions to edit role embed message during manual update."
@@ -419,44 +357,41 @@ class RoleTracker(commands.Cog):
                 exc_info=True,
             )
 
-    @tasks.loop(minutes=60)  # Runs every 60 minutes
+    @tasks.loop(minutes=60)
     async def update_role_embed(self):
-        """
-        Background task that updates the role member embed periodically.
-        """
-        await self.bot.wait_until_ready()  # Ensure the bot is ready before doing anything
+        await self.bot.wait_until_ready()
 
         if (
             not self.role_embed_message
-            and CONFIG["role_embed_channel_id"]
-            and CONFIG["role_embed_message_id"]
+            and self.config["role_embed_channel_id"]
+            and self.config["role_embed_message_id"]
         ):
-            # If bot restarted or message reference was lost, try to fetch it again
             try:
-                channel = self.bot.get_channel(CONFIG["role_embed_channel_id"])
+                channel = self.bot.get_channel(self.config["role_embed_channel_id"])
                 if channel:
                     self.role_embed_message = await channel.fetch_message(
-                        CONFIG["role_embed_message_id"]
+                        self.config["role_embed_message_id"]
                     )
                     self.logger.info(
                         f"Re-fetched role embed message for periodic update in channel: {channel.name}"
                     )
                 else:
                     self.logger.warning(
-                        f"Channel for role embed with ID {CONFIG['role_embed_channel_id']} not found during periodic update."
+                        f"Channel for role embed with ID {self.config['role_embed_channel_id']} not found during periodic update."
                     )
-                    return  # Can't update without the channel
+                    return
             except discord.NotFound:
                 self.logger.warning(
-                    f"Role embed message with ID {CONFIG['role_embed_message_id']} not found during periodic update. It might have been deleted. Resetting reference."
+                    f"Role embed message with ID {self.config['role_embed_message_id']} not found during periodic update. It might have been deleted. Resetting reference."
                 )
                 self.role_embed_message = None
-                CONFIG["role_embed_channel_id"] = None
-                CONFIG["role_embed_message_id"] = None
+                self.config["role_embed_channel_id"] = None
+                self.config["role_embed_message_id"] = None
+                db.save_config(self.config)
                 return
             except discord.Forbidden:
                 self.logger.error(
-                    f"Bot lacks permissions to access channel {CONFIG['role_embed_channel_id']} for periodic update."
+                    f"Bot lacks permissions to access channel {self.config['role_embed_channel_id']} for periodic update."
                 )
                 return
             except Exception as e:
@@ -485,8 +420,9 @@ class RoleTracker(commands.Cog):
                     "Role embed message not found during periodic update. It might have been deleted. Resetting reference."
                 )
                 self.role_embed_message = None
-                CONFIG["role_embed_channel_id"] = None
-                CONFIG["role_embed_message_id"] = None
+                self.config["role_embed_channel_id"] = None
+                self.config["role_embed_message_id"] = None
+                db.save_config(self.config)
             except discord.Forbidden:
                 self.logger.error(
                     "No permissions to edit role embed message during periodic update."
@@ -503,14 +439,10 @@ class RoleTracker(commands.Cog):
 
     @update_role_embed.before_loop
     async def before_update_role_embed(self):
-        """Waits until the bot is ready before starting the loop."""
         await self.bot.wait_until_ready()
         self.logger.info("Waiting for bot to be ready before starting update loop...")
 
 
 def setup(bot):
-    """
-    The setup function for the cog. This is called by the bot to load the cog.
-    """
     bot.add_cog(RoleTracker(bot))
     logging.getLogger(__name__).info("RoleTracker cog loaded.")
