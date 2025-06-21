@@ -73,7 +73,7 @@ class RoleTracker(commands.Cog):
 
         if not self.config["roles_to_track"]:
             trackable_roles = {role.id: role for role in guild.roles if role.members}
-            embed.description += "\n\n**Note:** No specific roles are configured for tracking. Displaying all roles with members."
+            embed.description = "*No specific roles are configured for tracking. Displaying all roles with members.*"
         else:
             trackable_roles = {}
             for role_id in self.config["roles_to_track"]:
