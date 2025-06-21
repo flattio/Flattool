@@ -19,8 +19,16 @@ def init():
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS config (
-                key TEXT PRIMARY KEY,
-                value TEXT
+            key TEXT PRIMARY KEY,
+            value TEXT
+            )
+        """
+        )
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS counting (
+            channel_id INTEGER PRIMARY KEY,
+            value INTEGER
             )
         """
         )
@@ -132,6 +140,72 @@ def clear_config():
         logger.info("Configuration reset to default values.")
     except sqlite3.Error as e:
         logger.error(f"Error resetting configuration: {e}", exc_info=True)
+    finally:
+        if conn:
+            conn.close()
+
+
+def create_counting_row(channel_id: int, value: int):
+    """
+    Ensures only one row exists in the counting table.
+    Deletes any existing rows, then inserts the new row.
+    """
+    conn = None
+    try:
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+        # Delete all existing rows to enforce only one row
+        cursor.execute("DELETE FROM counting")
+        # Insert the new row
+        cursor.execute(
+            "INSERT INTO counting (channel_id, value) VALUES (?, ?)",
+            (channel_id, value),
+        )
+        conn.commit()
+        logger.info(
+            f"Counting table reset with channel_id={channel_id}, value={value}."
+        )
+    except sqlite3.Error as e:
+        logger.error(f"Error setting counting row: {e}", exc_info=True)
+    finally:
+        if conn:
+            conn.close()
+
+
+def get_counting_row():
+    """
+    Retrieves the single row from the counting table.
+    Returns a tuple (channel_id, value) if present, else None.
+    """
+    conn = None
+    try:
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+        cursor.execute("SELECT channel_id, value FROM counting LIMIT 1")
+        row = cursor.fetchone()
+        return row  # Returns (channel_id, value) or None
+    except sqlite3.Error as e:
+        logger.error(f"Error retrieving counting row: {e}", exc_info=True)
+        return None
+    finally:
+        if conn:
+            conn.close()
+
+
+def update_counting_value(new_value: int):
+    """
+    Updates the value in the counting table to the specified new_value.
+    Assumes there is only one row in the table.
+    """
+    conn = None
+    try:
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+        cursor.execute("UPDATE counting SET value = ?", (new_value,))
+        conn.commit()
+        logger.info(f"Counting value updated to {new_value}.")
+    except sqlite3.Error as e:
+        logger.error(f"Error updating counting value: {e}", exc_info=True)
     finally:
         if conn:
             conn.close()
