@@ -106,5 +106,36 @@ def load_config() -> dict:
             conn.close()
 
 
+def clear_config():
+    """
+    Resets the configuration in the database to default values.
+    Deletes all existing config entries and inserts defaults.
+    """
+    default_config = {
+        "role_embed_channel_id": None,
+        "role_embed_message_id": None,
+        "roles_to_track": [None],
+        "embed_title": "Role Member Tracker",
+    }
+    conn = None
+    try:
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM config")
+        for key, value in default_config.items():
+            json_value = json.dumps(value)
+            cursor.execute(
+                "INSERT INTO config (key, value) VALUES (?, ?)",
+                (key, json_value),
+            )
+        conn.commit()
+        logger.info("Configuration reset to default values.")
+    except sqlite3.Error as e:
+        logger.error(f"Error resetting configuration: {e}", exc_info=True)
+    finally:
+        if conn:
+            conn.close()
+
+
 # Initialize the database when this module is imported
 init()

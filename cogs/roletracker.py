@@ -442,6 +442,24 @@ class RoleTracker(commands.Cog):
         await self.bot.wait_until_ready()
         self.logger.info("Waiting for bot to be ready before starting update loop...")
 
+    @role_tracker_commands.command(
+        name="reset_embed",
+        description="Restore the role member tracking embed to its default values.",
+    )
+    @commands.has_permissions(manage_roles=True)
+    async def reset_embed(self, ctx: discord.ApplicationContext):
+        await ctx.defer(ephemeral=True)
+        db.clear_config()
+        db.load_config()
+        self.logger.info(f"RoleTracker config after reset: {self.config}")
+        self.logger.info(f"Role embed message: {self.role_embed_message}")
+        await ctx.followup.send(
+            "The role member tracking embed has been reset to default values. "
+            "Please use `/role_tracker set_embed` to set it up again.",
+            ephemeral=True,
+        )
+        self.logger.info("Role member tracking embed configuration reset to defaults.")
+
 
 def setup(bot):
     bot.add_cog(RoleTracker(bot))
