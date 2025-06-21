@@ -31,7 +31,7 @@ intents.members = True
 bot = commands.Bot(command_prefix="f!", intents=intents, debug_guilds=DEBUG_GUILDS)
 
 # load cogs
-cogs_list = ["misc", "roletracker", "counting"]
+cogs_list = ["misc", "roletracker", "counting", "cats"]
 
 for cog in cogs_list:
     try:
