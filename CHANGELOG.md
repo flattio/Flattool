@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.2.0 (2025-06-22)
+
+### Features
+
+- Add bot status as dotenv variable
+  ([`8c6b5d5`](https://github.com/flattio/Flattool/commit/8c6b5d578c4452840b5fa44775e2968708996fe7))
+
+
 ## v1.1.0 (2025-06-22)
 
 ### Bug Fixes
