@@ -50,7 +50,8 @@ async def on_ready():
 
     # Set custom status
     try:
-        activity = discord.CustomActivity(name="Adding features...")
+        activity_name = os.getenv("BOT_STATUS", "Watching you...")
+        activity = discord.CustomActivity(name=activity_name)
         await bot.change_presence(status=discord.Status.online, activity=activity)
         logger.info("Status updated successfully")
         await bot.sync_commands(guild_ids=bot.debug_guilds)

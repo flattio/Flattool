@@ -20,6 +20,15 @@ if [ -z "$BOT_TOKEN" ]; then
   fi
 fi
 
+# --- Ask for BOT_STATUS ---
+if [ -z "$BOT_STATUS" ]; then
+  read -p "Please enter bot custom status: " BOT_STATUS
+  if [ -z "$BOT_STATUS" ]; then
+    echo "Error: Bot status cannot be empty. Exiting."
+    exit 1
+  fi
+fi
+
 # --- 1. Build the Docker Image ---
 echo "---"
 echo "Building Docker image: $IMAGE_NAME"
@@ -59,6 +68,7 @@ fi
 docker run -d \
   --name "$CONTAINER_NAME" \
   -e BOT_TOKEN="$BOT_TOKEN" \
+  -e BOT_STATUS="$BOT_STATUS" \
   -v "$VOLUME_NAME":$(dirname "$DB_CONTAINER_PATH") \
   "$IMAGE_NAME"
 
