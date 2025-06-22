@@ -61,4 +61,4 @@ async def on_ready():
 
 
 # Run the bot
-bot.run(os.getenv("DISCORD_TOKEN"))
+bot.run(os.getenv("BOT_TOKEN"))
