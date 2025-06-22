@@ -9,7 +9,7 @@ build==1.2.2.post1
 certifi==2025.4.26
 cffi==1.17.1
 charset-normalizer==3.4.2
-click==8.2.1
+click>=8.1
 click-option-group==0.5.7
 colorama==0.4.6
 commitizen==4.8.2

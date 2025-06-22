@@ -1,5 +1,5 @@
 # Use a slim Python image for smaller size
-FROM python:3.10-slim-bullseye
+FROM python:3.13-slim-bullseye
 
 WORKDIR /app
 
