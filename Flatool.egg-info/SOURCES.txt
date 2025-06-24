@@ -1,8 +1,0 @@
-README.md
-flatool.py
-pyproject.toml
-Flatool.egg-info/PKG-INFO
-Flatool.egg-info/SOURCES.txt
-Flatool.egg-info/dependency_links.txt
-Flatool.egg-info/requires.txt
-Flatool.egg-info/top_level.txt
