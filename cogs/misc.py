@@ -7,9 +7,7 @@ from discord.ext import tasks
 class Misc(commands.Cog):  # create a class for our cog that inherits from commands.Cog
     # this class is used to create a cog, which is a module that can be added to the bot
 
-    def __init__(
-        self, bot
-    ):  # this is a special method that is called when the cog is loaded
+    def __init__(self, bot):
         self.bot = bot
 
     @commands.has_permissions(administrator=True)
