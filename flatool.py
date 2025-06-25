@@ -20,7 +20,6 @@ db.init()
 DEBUG_GUILDS = [
     int(os.getenv("DEBUG_GUILDS", 0))
 ]  # Use environment variable for debug guild ID
-ALLOWED_ROLE_IDS = [1121590212011773962, 1091441098330746919, 1376694477233848442]
 
 # bot initialization
 intents = discord.Intents.default()
