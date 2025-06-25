@@ -133,7 +133,7 @@ class Reputation(commands.Cog):
                 entries, start=(page_num - 1) * per_page + 1
             ):
                 user = ctx.guild.get_member(user_id)
-                name = user.mention if user else f"User ID {user_id}"
+                name = user.name if user else f"User ID {user_id}"
                 embed.add_field(
                     name=f"#{idx}: {name}",
                     value=f"Reputation: {rep}",
