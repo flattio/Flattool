@@ -7,7 +7,7 @@ import database as db
 
 class RoleTracker(commands.Cog):
     """
-    A Pycord cog to track members within specific roles and display them in a dynamic embed.
+    Cog to track members within specific roles and display them in a dynamic embed.
     The embed automatically updates every 60 minutes.
     """
 
