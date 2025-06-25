@@ -93,6 +93,18 @@ class Reputation(commands.Cog):
             )
             await ctx.respond("An error occurred.", ephemeral=True)
 
+    @rep.command(name="check", description="Check your reputation and rank.")
+    async def check_rep(self, ctx: discord.ApplicationContext):
+        user_id = ctx.author.id
+        rank = db.get_rank(user_id)
+        rep = db.get_reputation(user_id)
+        embed = discord.Embed(
+            title="Your Reputation",
+            description=f"Rank: {rank}\nReputation: {rep}",
+            color=discord.Color.blue(),
+        )
+        await ctx.respond(embed=embed)
+
     @rep.command(name="leaderboard", description="Show the reputation leaderboard.")
     async def rep_leaderboard(self, ctx, page: int = 1):
         per_page = 10
