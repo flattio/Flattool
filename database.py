@@ -282,6 +282,24 @@ def get_reputation(user_id: int) -> int:
             conn.close()
 
 
+def clear_reputation():
+    """
+    Deletes all rows from the reputation table, clearing all user reputations.
+    """
+    conn = None
+    try:
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM reputation")
+        conn.commit()
+        logger.info("All reputations cleared from the database.")
+    except sqlite3.Error as e:
+        logger.error(f"Error clearing reputation table: {e}", exc_info=True)
+    finally:
+        if conn:
+            conn.close()
+
+
 def get_rank(user_id: int) -> int:
     """
     Returns the 1-based rank of the user by reputation.

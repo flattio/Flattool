@@ -146,6 +146,56 @@ class Reputation(commands.Cog):
         )
         await paginator.respond(ctx.interaction)
 
+    @rep.command(
+        name="clear",
+        description="Clear the entire reputation list. This action is irreversible.",
+    )
+    @commands.has_permissions(administrator=True)
+    async def clear_reputation(self, ctx: discord.ApplicationContext):
+        """Clear the entire reputation list. This action is irreversible."""
+        view = discord.ui.View(timeout=30)
+
+        class ConfirmButton(discord.ui.Button):
+            def __init__(self):
+                super().__init__(style=discord.ButtonStyle.danger, label="Confirm")
+
+            async def callback(self, interaction: discord.Interaction):
+                if interaction.user != ctx.author:
+                    await interaction.response.send_message("You are not authorized.")
+                    return
+                view.stop()
+                view.value = True
+                await interaction.response.edit_message(
+                    content="Confirmed. Clearing reputation...", view=None
+                )
+
+        class DenyButton(discord.ui.Button):
+            def __init__(self):
+                super().__init__(style=discord.ButtonStyle.secondary, label="Cancel")
+
+            async def callback(self, interaction: discord.Interaction):
+                if interaction.user != ctx.author:
+                    await interaction.response.send_message("You are not authorized.")
+                    return
+                view.stop()
+                view.value = False
+                await interaction.response.edit_message(content="Cancelled.", view=None)
+
+        view.add_item(ConfirmButton())
+        view.add_item(DenyButton())
+        view.value = None
+
+        await ctx.respond(
+            "Are you sure you want to clear the entire reputation list? This action is **irreversible**.",
+            view=view,
+        )
+
+        timeout = await view.wait()
+        if view.value is not True:
+            return
+        db.clear_reputation()
+        await ctx.respond("The reputation list has been cleared.")
+
 
 def setup(bot):
     bot.add_cog(Reputation(bot))
