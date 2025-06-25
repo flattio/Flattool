@@ -243,10 +243,22 @@ class Reputation(commands.Cog):
         )
 
         timeout = await view.wait()
+        logger.info(
+            "Clear reputation confirmation: timeout=%s, value=%s, by user_id=%s",
+            timeout,
+            getattr(view, "value", None),
+            ctx.author.id,
+        )
+        if timeout:
+            await ctx.edit(view=None)
+            await ctx.edit(
+                content="Timed out. Reputation list was not cleared.", view=None
+            )
+            return
         if view.value is not True:
             return
         db.clear_reputation()
-        await ctx.respond("The reputation list has been cleared.")
+        await ctx.edit(content="The reputation list has been cleared.", view=None)
 
 
 def setup(bot):
