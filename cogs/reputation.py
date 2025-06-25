@@ -146,6 +146,58 @@ class Reputation(commands.Cog):
         )
         await paginator.respond(ctx.interaction)
 
+    # Create a "blacklist" subcommand group under "rep"
+    blacklist = rep.create_subgroup("blacklist", "Manage the takerep blacklist.")
+
+    @blacklist.command(name="add", description="Add a user to the takerep blacklist.")
+    @commands.has_permissions(administrator=True)
+    async def blacklist_add(
+        self, ctx: discord.ApplicationContext, user: discord.Member
+    ):
+        """Add a user to the takerep blacklist in the database."""
+        db.add_to_takerep_blacklist(user.id)
+        await ctx.respond(
+            f"{user.mention} has been added to the takerep blacklist.", ephemeral=True
+        )
+
+    @blacklist.command(
+        name="remove", description="Remove a user from the takerep blacklist."
+    )
+    @commands.has_permissions(administrator=True)
+    async def blacklist_remove(
+        self, ctx: discord.ApplicationContext, user: discord.Member
+    ):
+        """Remove a user from the takerep blacklist in the database."""
+        db.remove_from_takerep_blacklist(user.id)
+        await ctx.respond(
+            f"{user.mention} has been removed from the takerep blacklist.",
+            ephemeral=True,
+        )
+
+    @blacklist.command(name="view", description="View the takerep blacklist.")
+    @commands.has_permissions(administrator=True)
+    async def blacklist_view(self, ctx: discord.ApplicationContext):
+        """View the takerep blacklist."""
+        blacklist = db.get_takerep_blacklist()  # Should return a list of user IDs
+        if not blacklist:
+            await ctx.respond("The takerep blacklist is empty.", ephemeral=True)
+            return
+
+        members = []
+        for user_id in blacklist:
+            user = ctx.guild.get_member(user_id)
+            if user:
+                members.append(user.mention)
+            else:
+                members.append(f"User ID {user_id}")
+
+        embed = discord.Embed(
+            title="Takerep Blacklist",
+            description="\n".join(members),
+            color=discord.Color.red(),
+        )
+        await ctx.respond(embed=embed, ephemeral=True)
+
     @rep.command(
         name="clear",
         description="Clear the entire reputation list. This action is irreversible.",
