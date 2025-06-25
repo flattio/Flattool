@@ -41,8 +41,7 @@ class Reputation(commands.Cog):
         new_rank = db.get_rank(member.id)
         new_rep = db.get_reputation(member.id)
         await ctx.respond(
-            f"Gave +1 reputation to {member.mention}. They are now rank {new_rank} with {new_rep} rep!",
-            ephemeral=True,
+            f"Gave +1 reputation to {member.mention}. They are now rank {new_rank} with {new_rep} rep!"
         )
 
     @give_rep.error
@@ -56,6 +55,41 @@ class Reputation(commands.Cog):
         else:
             logger.error(
                 "An error occurred in give_rep command: %s", error, exc_info=True
+            )
+            await ctx.respond("An error occurred.", ephemeral=True)
+
+    @rep.command(name="take", description="Take reputation from another user.")
+    @commands.cooldown(1, 86400, commands.BucketType.user)
+    async def take_rep(self, ctx: discord.ApplicationContext, member: discord.Member):
+        if member.id == ctx.author.id:
+            await ctx.respond(
+                "You cannot take reputation from yourself.", ephemeral=True
+            )
+            return
+
+        # Check if the recipient can receive reputation
+        if not can_receive_rep(member):
+            await ctx.respond("Only staff members can lose reputation.", ephemeral=True)
+            return
+
+        db.update_reputation(member.id, -1)
+        new_rank = db.get_rank(member.id)
+        new_rep = db.get_reputation(member.id)
+        await ctx.respond(
+            f"Took -1 reputation from {member.mention}. They are now rank {new_rank} with {new_rep} rep."
+        )
+
+    @take_rep.error
+    async def take_rep_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            retry_timestamp = int(time.time() + error.retry_after)
+            await ctx.respond(
+                f"You can use this command again <t:{retry_timestamp}:R>.",
+                ephemeral=True,
+            )
+        else:
+            logger.error(
+                "An error occurred in take_rep command: %s", error, exc_info=True
             )
             await ctx.respond("An error occurred.", ephemeral=True)
 
