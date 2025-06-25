@@ -106,26 +106,31 @@ class Reputation(commands.Cog):
         await ctx.respond(embed=embed)
 
     @rep.command(name="leaderboard", description="Show the reputation leaderboard.")
-    async def rep_leaderboard(self, ctx, page: int = 1):
+    async def rep_leaderboard(self, ctx):
         per_page = 10
-        # Fetch leaderboard data from the database
-        leaderboard = db.get_leaderboard()  # Should return list of (user_id, rep)
-        total_pages = max(1, (len(leaderboard) + per_page - 1) // per_page)
-        page = max(1, min(page, total_pages))
-        start = (page - 1) * per_page
-        end = start + per_page
-        entries = leaderboard[start:end]
+        leaderboard = db.get_leaderboard()  # List of (user_id, rep)
+        if not leaderboard:
+            embed = discord.Embed(
+                title="Reputation Leaderboard",
+                description="No users found.",
+                color=discord.Color.gold(),
+            )
+            await ctx.respond(embed=embed)
+            return
 
-        embed = discord.Embed(
-            title="Reputation Leaderboard",
-            description=f"Page {page}/{total_pages}",
-            color=discord.Color.gold(),
-        )
-
-        if not entries:
-            embed.add_field(name="No data", value="No users found.", inline=False)
-        else:
-            for idx, (user_id, rep) in enumerate(entries, start=start + 1):
+        # Build pages
+        page_entries = [
+            leaderboard[i : i + per_page] for i in range(0, len(leaderboard), per_page)
+        ]
+        embeds = []
+        for page_num, entries in enumerate(page_entries, start=1):
+            embed = discord.Embed(
+                title="Reputation Leaderboard",
+                color=discord.Color.gold(),
+            )
+            for idx, (user_id, rep) in enumerate(
+                entries, start=(page_num - 1) * per_page + 1
+            ):
                 user = ctx.guild.get_member(user_id)
                 name = user.mention if user else f"User ID {user_id}"
                 embed.add_field(
@@ -133,8 +138,13 @@ class Reputation(commands.Cog):
                     value=f"Reputation: {rep}",
                     inline=False,
                 )
+            embeds.append(embed)
 
-        await ctx.respond(embed=embed, ephemeral=True)
+        paginator = pages.Paginator(
+            pages=embeds, show_indicator=True, use_default_buttons=True
+        )
+        await paginator.respond(ctx.interaction)
+
 
 
 def setup(bot):
