@@ -3,6 +3,7 @@ from discord.ext import commands
 import database as db
 import logging
 import time
+from discord.ext import pages
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +145,6 @@ class Reputation(commands.Cog):
             pages=embeds, show_indicator=True, use_default_buttons=True
         )
         await paginator.respond(ctx.interaction)
-
 
 
 def setup(bot):
