@@ -10,6 +10,15 @@ VOLUME_NAME="flatool-db"
 DB_HOST_PATH="./data/flatool.db" # Path to your local SQLite DB file
 DB_CONTAINER_PATH="/app/data/flatool.db" # Path where the DB will be mounted inside the container
 
+# --- Load BOT_TOKEN from .env if available ---
+if [ -f .env ]; then
+  # Extract BOT_TOKEN from .env (ignore comments and export statements)
+  BOT_TOKEN_FROM_ENV=$(grep -E '^\s*BOT_TOKEN\s*=' .env | grep -v '^#' | tail -n 1 | cut -d '=' -f2- | xargs)
+  if [ -n "$BOT_TOKEN_FROM_ENV" ]; then
+    BOT_TOKEN="$BOT_TOKEN_FROM_ENV"
+  fi
+fi
+
 # --- Ask for BOT_TOKEN ---
 if [ -z "$BOT_TOKEN" ]; then
   read -sp "Please enter your bot token: " BOT_TOKEN
